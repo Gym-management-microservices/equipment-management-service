@@ -13,6 +13,9 @@ public class EquipmentService {
     @Autowired
     private EquipmentRepository equipmentRepository;
 
+    @Autowired
+    private PaymentEquipmentProducer paymentEquipmentProducer;
+
     public Equipment getEquipment(EquipmentId id) {
         return equipmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Equipment not found with ID: " + id.getEquipmentid_value()));
@@ -23,7 +26,10 @@ public class EquipmentService {
     }
 
     public Equipment createEquipment(Equipment equipment) {
-        return equipmentRepository.save(equipment);
+
+        Equipment saved = equipmentRepository.save(equipment);
+        paymentEquipmentProducer.postPayment(saved,-1); // Publica el evento de pago con un precio fijo de 100.0
+        return saved;
     }
 
     public void changeStatus(EquipmentId id, EquipmentStatus newStatus) {
